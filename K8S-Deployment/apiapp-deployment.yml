@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: apiapp
+
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: apiapp
+    spec:
+      containers:
+      - name: apiapp
+        image: jit2600/apiapp:latest
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 5000
+  

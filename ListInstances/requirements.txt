@@ -1,0 +1,3 @@
+oci
+simplejson
+flask
