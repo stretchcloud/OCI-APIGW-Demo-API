@@ -1,0 +1,5 @@
+oci
+sqlalchemy
+simplejson
+flask
+flask_restful
