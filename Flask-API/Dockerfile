@@ -6,7 +6,7 @@ COPY requirements.txt .
 COPY config /home/app/.oci/
 COPY oci_api_key.pem /home/app/.oci/
 COPY data-import.sh .
-COPY object-upload.py .
+COPY object-download.py .
 COPY FlaskApp.py .
 
 
