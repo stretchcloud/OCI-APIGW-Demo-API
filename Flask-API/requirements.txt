@@ -1,5 +1,6 @@
 oci
-sqlalchemy
 simplejson
 flask
 flask_restful
+flask_sqlalchemy
+flask-jsonpify
