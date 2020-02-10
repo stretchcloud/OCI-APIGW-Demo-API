@@ -2,7 +2,7 @@
 
 
 This instruction is to show, how to run the developed API App in either inside a Docker Container or inside a Kubernetes Cluster.
-  
+
 This is split in two buckets. Firstly we will see how to deploy it in Docker Container and the second part will focus on Kubernetes.
 
   
@@ -57,3 +57,17 @@ At this point, you can use the same curl option to test the API endpoint.
 
 ### Note
 Due to time constraint, this application has been packaged inside a single docker container and did not use the best practice of App and DB as separate container/POD and then persist the data with statefulset & a PV & PVC.
+
+
+
+# API
+
+We would like you to implement the below HTTP endpoint.
+If you want to, you can expand the capabilities of the API, but please ensure that the following endpoints will work as described below.
+
+| HTTP Verb | Path         | Request Content-Type | Request body | Response Content-Type | Example response body                                        |
+| --------- | ------------ | -------------------- | ------------ | --------------------- | ------------------------------------------------------------ |
+| GET       | `/instances` | `application/json`   | -            | `application/json`    | `[ { "uuid": "49dc24bd-906d-4497-bcfc-ecc8c309ecfc", survived": true, "passengerClass": 3, "name": "Mr. Owen Harris Braund", "sex": "male", "age": 22, "siblingsOrSpousesAboard": 1, "parentsOrChildrenAboard":0, "fare":7.25}, ... ]` |
+
+
+
