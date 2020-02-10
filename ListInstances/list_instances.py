@@ -19,7 +19,6 @@ import json
 import shapes
 import logging
 
-
 # Script configuation ###################################################################################
 
 configfile = "/home/app/.oci/config"  # Define config file to be used. 
