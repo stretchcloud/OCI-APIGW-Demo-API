@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: apiapp
+  name: flaskapp
 
 spec:
   type: LoadBalancer
@@ -9,4 +9,4 @@ spec:
   - port: 5000
 
   selector:
-    app: apiapp
+    app: flaskapp

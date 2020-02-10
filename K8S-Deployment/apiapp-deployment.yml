@@ -1,18 +1,18 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: apiapp
+  name: flaskapp
 
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: apiapp
+        app: flaskapp
     spec:
       containers:
-      - name: apiapp
-        image: jit2600/apiapp:latest
+      - name: flaskapp
+        image: jit2600/flaskapp:latest
         imagePullPolicy: "IfNotPresent"
         ports:
         - containerPort: 5000
