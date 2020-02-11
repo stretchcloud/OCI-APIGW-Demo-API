@@ -127,9 +127,9 @@ To create the Deployment, you need to use the OKE Loadbalancer Public IP, edit t
 
 
 ```bash
-$ oci api-gateway deployment create --gateway-id <API-GW-OCID> --compartment-id <compartment-ocid> --path-prefix /v1 --specification 
+$ oci api-gateway deployment create --gateway-id <API-GW-OCID> --compartment-id <compartment-ocid> --path-prefix "/v1" --specification file://simple-deployment-json
 
-$ oci api-gateway deployment create --gateway-id <API-GW-OCID> --compartment-id <compartment-ocid> --path-prefix /v2 --specification 
+$ oci api-gateway deployment create --gateway-id <API-GW-OCID> --compartment-id <compartment-ocid> --path-prefix "/v2" --specification file://wildcard-deployment.json
 
 This will create two deployments, the first one being the one to list all of the instances and the second one where we will provide the shape of the instance and it will query the database to match and retrieve the result. Make a note of the Deployment OCID for both the deployment, this is required to retrieve the endpoint.
 
