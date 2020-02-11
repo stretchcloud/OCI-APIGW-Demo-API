@@ -9,9 +9,9 @@ We will use OCI Cloud Shell to build everything off, so there is no need to have
 
 
 
-![API-GW-Arch](/Users/prassark/Desktop/OCI-ListInstance-API/API-GW-Arch.png)
+![API-GW-Arch](https://github.com/stretchcloud/OCI-APIGW-Demo-API/blob/master/API-GW-Arch.png)
 
-  
+
 
 ### 1. Clone the repository, build & run the Docker Container
 
