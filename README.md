@@ -5,7 +5,11 @@ This instruction is to show, how to run the developed List Instances API in eith
 
 This is split in four buckets. Firstly we will see how to build the Docker container to generate the List of Instances, export it to a CSV file & upload it to Object Storage Bucket. Secondly, we will build a Docker Container for the actual Python Flask API and push it to a Docker repository. Third, we will deploy it your OKE Cluster and at the end we will expose it through OCI API Gateway.
 
-We will use OCI Cloud Shell to build everything off, so there is no need to have any intervention on your local machine.
+We will use OCI Cloud Shell to build everything off, so there is no need to have any intervention on your local machine. Below is a diagram that depicts our Architecture which will be implemented by end of this instruction.
+
+
+
+![API-GW-Arch](/Users/prassark/Desktop/OCI-ListInstance-API/API-GW-Arch.png)
 
   
 
