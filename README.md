@@ -13,6 +13,8 @@ We will use OCI Cloud Shell to build everything off, so there is no need to have
 
 
 
+
+
 ## 1. Clone the repository, build & run the Docker Container
 
 
@@ -38,6 +40,8 @@ $ docker run --name listinstancesapp <docker-hub-handle>/listinstances:latest
 
 
 
+
+
 ## 2. Build the Docker Container for the Flask API
 
 Dockerfile to create the Python Flask API has been already pushed to the repo. You need to build the Docker Container of the API and then push it to a Docker Registry. You need to use the same upstream Docker Image to deploy this on top of your OKE Cluster.
@@ -56,6 +60,8 @@ $ docker push <docker-hub-handle>/flaskapp:latest
 
 
 This will build the Docker Container for the Flask API and push it your Docker Repository. We will use this in our next step to deploy it on top of OKE Cluster.
+
+
 
 ## 3. Deploy it on OKE Cluster
 
@@ -79,6 +85,8 @@ Make a note of the Public IP (coming from OCI Loadbalancer) as we need it to exp
 
 
 This will deploy the Flask API on top of your OKE Cluster and have a OCI Loadbalancer backed public IP to access it. Make sure that you have port 5000 open in the OCI Security Lists.
+
+
 
 
 
