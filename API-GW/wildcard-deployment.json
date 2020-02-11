@@ -1,0 +1,47 @@
+{
+    
+    "display-name": "ListInstancebyShape",
+    "gateway-id": "<APIGatewayOCID>",
+    "path-prefix": "/v2",
+      "specification": {
+        "logging-policies": {
+          "access-log": null,
+          "execution-log": {
+            "is-enabled": true,
+            "log-level": "ERROR"
+          }
+        },
+        "request-policies": {
+          "authentication": null,
+          "cors": null,
+          "rate-limiting": null
+        },
+        "routes": [
+          {
+            "backend": {
+              "connect-timeout-in-seconds": 60.0,
+              "is-ssl-verify-disabled": true,
+              "read-timeout-in-seconds": 10.0,
+              "send-timeout-in-seconds": 10.0,
+              "type": "HTTP_BACKEND",
+              "url": "http://<OKE-LB-SVC-PUB-IP>:5000/instances/${request.path[shape]}"
+            },
+            "logging-policies": {
+              "access-log": null,
+              "execution-log": {
+                "is-enabled": true,
+                "log-level": "ERROR"
+              }
+            },
+            "methods": [
+              "GET"
+            ],
+            "path": "/instances/{shape}",
+            "request-policies": {
+              "authorization": null,
+              "cors": null
+            }
+          }
+        ]
+      }
+}

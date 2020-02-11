@@ -1,4 +1,4 @@
-# APIApp
+# OCI List Instances API APP
 
 
 This instruction is to show, how to run the developed API App in either inside a Docker Container or inside a Kubernetes Cluster.
@@ -12,9 +12,7 @@ This is split in two buckets. Firstly we will see how to deploy it in Docker Con
 First of all, let's clone this repository
 
 `git clone https://gitlab.com/stretchcloud/API-Exercise`
-
 `cd API-Exercise`
-
 `docker build -t apiapp:latest .`
 
 Your Docker Image is ready. You can either run it in daemon mode or interactive run.
