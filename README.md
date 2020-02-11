@@ -17,7 +17,7 @@ We will use OCI Cloud Shell to build everything off, so there is no need to have
 
 
 
-Login to your Cloud Shell Console and clone this repository
+Login to your Cloud Shell Console and clone this repository. If you don't know how to login to the Cloud Shell, then visit this Lab Guide to see how to do it yourself. OCI Cloud Shell is a free feature for the developers who would like to simplify things at the time of development and run the commands within the shell without any extra step to perform the OCI CLI config.
 
 ```bash
 $ git clone https://github.com/stretchcloud/OCI-APIGW-Demo-API
@@ -38,37 +38,72 @@ $ docker run --name listinstancesapp <docker-hub-handle>/listinstances:latest
 
 
 
-### 2. Deploy it to Kubernetes
+### 2. Build the Docker Container for the Flask API
 
-We have already built the Docker Image and pushed it to Docker Registry. Also, we have supplied the APIApp Deployment and Service YML. Create a deployment and a service and you will be good to go.
+Dockerfile to create the Python Flask API has been already pushed to the repo. You need to build the Docker Container of the API and then push it to a Docker Registry. You need to use the same upstream Docker Image to deploy this on top of your OKE Cluster.
 
-`kubectl create -f apiapp-deployment.yml`
+To build this image, you need to copy your OCI Config file content along with the Private Key content in PEM format here. This is the same step that you have performed earlier. So, you can just copy paste the same file in this directory.
 
-`kubectl create -f apiapp-service.yml`
-
-`kubectl get deployments` => Check whether the app has been deployed
-
-`kubectl get service` => Check whether the service has been deployed
-
-`kubectl get pods` => Check whether the POD is up and running 
-
-`kubectl port-forward service/apiapp 5000 5000` => Create the port-forward to access the API
-
-At this point, you can use the same curl option to test the API endpoint.
-
-### Note
-Due to time constraint, this application has been packaged inside a single docker container and did not use the best practice of App and DB as separate container/POD and then persist the data with statefulset & a PV & PVC.
+```bash
+$ cp OCI-APIGW-Demo-API/ListInstances/config OCI-APIGW-Demo-API/Flask-API/
+$ cp OCI-APIGW-Demo-API/ListInstances/oci_api_key.pem OCI-APIGW-Demo-API/Flask-API/
+$ cd OCI-APIGW-Demo-API/Flask-API
+$ docker build -t flaskapp:latest .
+$ docker tag flaskapp:latest <docker-hub-handle>/flaskapp:latest
+$ docker push <docker-hub-handle>/flaskapp:latest
+```
 
 
 
-# API
+This will build the Docker Container for the Flask API and push it your Docker Repository. We will use this in our next step to deploy it on top of OKE Cluster.
 
-We would like you to implement the below HTTP endpoint.
-If you want to, you can expand the capabilities of the API, but please ensure that the following endpoints will work as described below.
+### 3. Deploy it on OKE Cluster
 
-| HTTP Verb | Path         | Request Content-Type | Request body | Response Content-Type | Example response body                                        |
-| --------- | ------------ | -------------------- | ------------ | --------------------- | ------------------------------------------------------------ |
-| GET       | `/instances` | `application/json`   | -            | `application/json`    | `[ { "uuid": "49dc24bd-906d-4497-bcfc-ecc8c309ecfc", survived": true, "passengerClass": 3, "name": "Mr. Owen Harris Braund", "sex": "male", "age": 22, "siblingsOrSpousesAboard": 1, "parentsOrChildrenAboard":0, "fare":7.25}, ... ]` |
+We will assume that you already have a OKE Cluster deployed and ready to be consumed. If not then you can follow this [link](https://oke-rancher.gitbook.io/oke-rancher/ ) to create one using Rancher Management Console.
+
+We have provided the Kubernetes manifests inside the K8S-Deployment folder. Let's use it to deploy the API.
+
+
+
+```bash
+$ cd OCI-APIGW-Demo-API/K8S-Deployment
+
+Here edit the apiapp-deployment.yaml file and change the image: jit2600/flaskapp:latest to your Docker Registry and image that you have pushed to in step 2.
+
+$ kubectl apply -f .
+$ kubectl get svc flaskapp
+
+Make a note of the Public IP (coming from OCI Loadbalancer) as we need it to expose via API Gateway in the next section.
+```
+
+
+
+This will deploy the Flask API on top of your OKE Cluster and have a OCI Loadbalancer backed public IP to access it. Make sure that you have port 5000 open in the OCI Security Lists.
+
+
+
+### 4. Deploy the API Gateway & API Deployment Resources
+
+This is the last step of our demo. You need to create a API Gateway along with API Gateway Deployments using the provided JSON file.
+
+
+
+```bash
+$ oci 
+```
+
+
+
+# API Spec
+
+The API has been implemented as per the below HTTP endpoint.
+
+If you want to, you can expand the capabilities of the API, such as, search the Instances based on family or running status etc.
+
+| HTTP Verb | Path                 | Request Content-Type | Request body | Response Content-Type | Example response body                                        |
+| --------- | -------------------- | -------------------- | ------------ | --------------------- | ------------------------------------------------------------ |
+| GET       | `/instances`         | `application/json`   | -            | `application/json`    | `{"data": [{"AD": "EU-FRANKFURT-1-AD-3", "Compartment": "Dyn", "Instances-env.Operation": "n/a", "Licensed": "BYOL", "MEMORY": "15", "Name": "fra-01-wp", "OCPU": "1", "OS": "Canonical-Ubuntu-16.04-2018.10.16-0", "PrivateIP": "10.0.2.3 ", "PublicIP": "130.1.1.1 ", "SSD TB": "0", "Service": "Compute", "Shape": "VM.Standard2.1", "State": "RUNNING", "Version": "n/a"}]}` |
+| GET       | `/instances/{shape}` | `application/json`   | -            | `application/json`    | `{"data": [{"AD": "EU-FRANKFURT-1-AD-3", "Compartment": "Dyn", "Instances-env.Operation": "n/a", "Licensed": "BYOL", "MEMORY": "15", "Name": "fra-01-wp", "OCPU": "1", "OS": "Canonical-Ubuntu-16.04-2018.10.16-0", "PrivateIP": "10.0.2.3 ", "PublicIP": "130.1.1.2", "SSD TB": "0", "Service": "Compute", "Shape": "VM.Standard2.1", "State": "RUNNING", "Version": "n/a"}]}` |
 
 
 
