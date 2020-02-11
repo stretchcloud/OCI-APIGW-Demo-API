@@ -1,37 +1,36 @@
-# OCI List Instances API APP
+# OCI List Instances API
 
 
-This instruction is to show, how to run the developed API App in either inside a Docker Container or inside a Kubernetes Cluster.
+This instruction is to show, how to run the developed List Instances API in either inside a Docker Container or inside a Kubernetes Cluster and then use Oracle Cloud Infrastructure API Gateway to expose it.
 
-This is split in two buckets. Firstly we will see how to deploy it in Docker Container and the second part will focus on Kubernetes.
+This is split in four buckets. Firstly we will see how to build the Docker container to generate the List of Instances, export it to a CSV file & upload it to Object Storage Bucket. Secondly, we will build a Docker Container for the actual Python Flask API and push it to a Docker repository. Third, we will deploy it your OKE Cluster and at the end we will expose it through OCI API Gateway.
+
+We will use OCI Cloud Shell to build everything off, so there is no need to have any intervention on your local machine.
 
   
 
-### 1. Fork this repository & Deploy the build the Docker Container
+### 1. Clone the repository, build & run the Docker Container
 
-First of all, let's clone this repository
 
-`git clone https://gitlab.com/stretchcloud/API-Exercise`
-`cd API-Exercise`
-`docker build -t apiapp:latest .`
 
-Your Docker Image is ready. You can either run it in daemon mode or interactive run.
+Login to your Cloud Shell Console and clone this repository
 
-`docker run --name apiapp -p 5000:5000 apiapp:latest` => Run this if you want to debug the output.
+```bash
+$ git clone https://github.com/stretchcloud/OCI-APIGW-Demo-API
+$ cd OCI-APIGW-Demo-API/ListInstances
+```
 
-`docker run --name apiapp -d -p 5000:5000 apiapp:latest` => Non interactive, daemon mode.
+You need to edit the config file according to your OCI credentials and also upload the Private Key in PEM format. These files are already in the directory. Just edit and paste your content. If you are unsure, then follow this [link](https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm) to get your Keys in there. While editing the config file leave the ***key_file*** parameter as it is in the file.
 
-Use `curl` to test the endpoint
+```bash
+Run this to build the Docker container, push it to a repository and run the container to generate & upload the CSV file for the Instances.
 
-`curl -X GET -H "Content-type: application/json" http://127.0.0.1:5000/people`
-
-`curl -X GET -H "Content-type: application/json" http://127.0.0.1:5000/people/{uuid}`
-
-`curl -X DELETE -H "Content-type: application/json" http://127.0.0.1:5000/people/{uuid}`
-
-`curl -X POST -H "Content-type: application/json" -d '{"survived" : "1", "passengerClass" : "3", "name" : "Sandhya Sarkar", "sex" : "Female", "age" : "104", "siblingsOrSpousesAboard" : "0", "parentsOrChildrenAboard" : "0", "fare" : "40"}' http://127.0.0.1:5000/people/`
-
-`curl -X PUT -H "Content-type: application/json" -d '{"survived" : "1", "passengerClass" : "3", "name" : "Sandhya Sarkar", "sex" : "Female", "age" : "104", "siblingsOrSpousesAboard" : "0", "parentsOrChildrenAboard" : "0", "fare" : "100"}' http://127.0.0.1:5000/people/{uuid}`
+$ docker build -t listinstances:latest .
+$ docker tag listinstances:latest <docker-hub-handle>/listinstances:latest
+$ docker login
+$ docker push <docker-hub-handle>/listinstances:latest
+$ docker run --name listinstancesapp <docker-hub-handle>/listinstances:latest
+```
 
 
 

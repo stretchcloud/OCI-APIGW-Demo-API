@@ -1,7 +1,7 @@
 [DEFAULT]
 user=ocid1.user.oc1.............
 fingerprint=<your-fingerprint>
-key_file=<.pem file location>
+key_file=/home/app/.oci/oci_api_key.pem
 pass_phrase=<if you have a passphrase>
 tenancy=ocid1.tenancy.oc1...........
 region=<your default region goes here>
