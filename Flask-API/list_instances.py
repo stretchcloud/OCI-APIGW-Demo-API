@@ -22,7 +22,7 @@ User = ""
 AllPredefinedTags = True        # use only predefined tags from root compartment or include all compartment tags as well
 NoValueString = "n/a"           # what value should be used when no data is available
 FieldSeperator = ","            # what value should be used as field seperator
-ReportFile = "/home/app/instances.csv"
+ReportFile = "instances.csv"
 EndLine = "\n"
 
 # #######################################################################################################

@@ -1,11 +1,13 @@
 # OCI List Instances API
 
 
-This instruction is to show, how to run the developed List Instances API in either inside a Docker Container or inside a Kubernetes Cluster and then use Oracle Cloud Infrastructure API Gateway to expose it.
+This instruction is to show, how to run the developed List Instances API in a Kubernetes Cluster and then use Oracle Cloud Infrastructure API Gateway to expose it.
 
-This is split in four buckets. Firstly we will see how to build the Docker container to generate the List of Instances, export it to a CSV file & upload it to Object Storage Bucket. Secondly, we will build a Docker Container for the actual Python Flask API and push it to a Docker repository. Third, we will deploy it your OKE Cluster and at the end we will expose it through OCI API Gateway.
+This is split in three buckets. Firstly we will build the Docker container that will run the Python Flask API to serve the model. Secondly, we will deploy it on our OKE Cluster and at the end we will expose it through OCI API Gateway.
 
 We will use OCI Cloud Shell to build everything off, so there is no need to have any intervention on your local machine. Below is a diagram that depicts our Architecture which will be implemented by end of this instruction.
+
+Also, as we are using OCI Cloud Shell, we don't need to carry any Private Key, API Fingerprint etc. We will use Cloud Shell Delegation Token to authenticate.
 
 
 
@@ -15,7 +17,7 @@ We will use OCI Cloud Shell to build everything off, so there is no need to have
 
 
 
-## 1. Clone the repository, build & run the Docker Container
+## 1. Clone the repository, generate the CSV & build the Docker Container
 
 
 
@@ -23,38 +25,45 @@ Login to your Cloud Shell Console and clone this repository. If you don't know h
 
 ```bash
 $ git clone https://github.com/stretchcloud/OCI-APIGW-Demo-API
-$ cd OCI-APIGW-Demo-API/ListInstances
+$ cd OCI-APIGW-Demo-API/Flask-API
 ```
 
-You need to edit the config file according to your OCI credentials and also upload the Private Key in PEM format. These files are already in the directory. Just edit and paste your content. If you are unsure, then follow this [link](https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm) to get your Keys in there. While editing the config file leave the ***key_file*** parameter as it is in the file.
+
+
+You need to run the `list_instances.py` script to generate the CSV file. To do this you need to edit the file in `vi` editor and specify your `Tenancy OCID` and your `User OCID`. These two parameters are required for you to authenticate against your Tenancy. 
+
+
 
 ```bash
-Run this to build the Docker container, push it to a repository and run the container to generate & upload the CSV file for the Instances.
+$ vi list_instances.py
 
-$ docker build -t listinstances:latest .
-$ docker tag listinstances:latest <docker-hub-handle>/listinstances:latest
-$ docker login
-$ docker push <docker-hub-handle>/listinstances:latest
-$ docker run --name listinstancesapp <docker-hub-handle>/listinstances:latest
+Change these two variable and specify your OCIDs.
+
+Tenancy = ""
+User = ""
+
+Save the file and quit.
+
+$ python list_instances.py
+
+This will generate the CSV and save it in local directory.
 ```
 
 
-
-
-
-## 2. Build the Docker Container for the Flask API
 
 Dockerfile to create the Python Flask API has been already pushed to the repo. You need to build the Docker Container of the API and then push it to a Docker Registry. You need to use the same upstream Docker Image to deploy this on top of your OKE Cluster.
 
-To build this image, you need to copy your OCI Config file content along with the Private Key content in PEM format here. This is the same step that you have performed earlier. So, you can just copy paste the same file in this directory.
+Run this to build the Docker container & push it to a repository.
+
+
 
 ```bash
-$ cp OCI-APIGW-Demo-API/ListInstances/config OCI-APIGW-Demo-API/Flask-API/
-$ cp OCI-APIGW-Demo-API/ListInstances/oci_api_key.pem OCI-APIGW-Demo-API/Flask-API/
-$ cd OCI-APIGW-Demo-API/Flask-API
+
 $ docker build -t flaskapp:latest .
 $ docker tag flaskapp:latest <docker-hub-handle>/flaskapp:latest
+$ docker login
 $ docker push <docker-hub-handle>/flaskapp:latest
+
 ```
 
 
@@ -63,7 +72,7 @@ This will build the Docker Container for the Flask API and push it your Docker R
 
 
 
-## 3. Deploy it on OKE Cluster
+## 2. Deploy it on OKE Cluster
 
 We will assume that you already have a OKE Cluster deployed and ready to be consumed. If not then you can follow this [link](https://oke-rancher.gitbook.io/oke-rancher/ ) to create one using Rancher Management Console.
 
@@ -74,7 +83,7 @@ We have provided the Kubernetes manifests inside the K8S-Deployment folder. Let'
 ```bash
 $ cd OCI-APIGW-Demo-API/K8S-Deployment
 
-Here edit the apiapp-deployment.yaml file and change the image: jit2600/flaskapp:latest to your Docker Registry and image that you have pushed to in step 2.
+Here edit the apiapp-deployment.yaml file and change the image: <docker-hub-handle>/flaskapp:latest to your Docker Registry and image that you have pushed to in step 1.
 
 $ kubectl apply -f .
 $ kubectl get svc flaskapp

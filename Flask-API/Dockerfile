@@ -9,10 +9,9 @@ adduser --system --ingroup app --no-create-home app &&\
 pip install --upgrade pip &&\
 pip install -r requirements.txt &&\
 apt-get install -y sqlite &&\
-python list_instances.py &&\
 chmod +x data-import.sh &&\
 ./data-import.sh &&\
-rm -rf Dockerfile
+rm -rf Dockerfile list_instaces.py
 
 
 EXPOSE 5000
