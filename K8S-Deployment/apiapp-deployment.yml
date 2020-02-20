@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: flaskapp
-        image: jit2600/flaskapp:latest
+        image: <dockerimage>
         imagePullPolicy: "IfNotPresent"
         ports:
         - containerPort: 5000
