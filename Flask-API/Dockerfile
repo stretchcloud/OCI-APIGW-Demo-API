@@ -1,7 +1,7 @@
 FROM python:3.7-slim
 WORKDIR /home/app
 
-ADD * /home/app
+ADD * /home/app/
 
 RUN apt-get update -y &&\ 
 addgroup --system app &&\
@@ -11,7 +11,7 @@ pip install -r requirements.txt &&\
 apt-get install -y sqlite &&\
 chmod +x data-import.sh &&\
 ./data-import.sh &&\
-rm -rf Dockerfile list_instaces.py
+rm -rf Dockerfile list_instances.py
 
 
 EXPOSE 5000
