@@ -1,27 +1,24 @@
 # Oracle OCI - Instance report script
-# Version: 1.8 22-November 2018
-# Written by: richard@oc-blog.com
-# More info see: www.oc-blog.com
+# Version: 2.0 19-February 2020
+# Written by: prasenjit.sarkar@oracle.com
 #
 # This script will create a CSV report for all compute and DB instances (including ADW and ATP)
 # in your OCI account, including predefined tags
 #
 # Instructions:
-# - you need the OCI python API, this can be installed by running: pip install oci
-# - you need the OCI CLI, this can be installed by running: pip install oci-cli
-# - Make sure you have a user with an API key setup in the OCI Identity
-# - Create a config file using the oci cli tool by running: oci setup config
-# - In the script specify the config file to be used for running the report
-# - You can specify any region in the config file, the script will query all enabled regions
+# - you need to specify two variables and that is Tenancy and User and change the value according to your Tenancy.
+# - this script uses Cloud Shell Delegation Token, so you don't need any private key or fingerprint.
 
 import oci
 import json
 import shapes
 import logging
 
+
 # Script configuation ###################################################################################
 
-configfile = "/home/app/.oci/config"  # Define config file to be used. 
+Tenancy = ""
+User = ""
 AllPredefinedTags = True        # use only predefined tags from root compartment or include all compartment tags as well
 NoValueString = "n/a"           # what value should be used when no data is available
 FieldSeperator = ","            # what value should be used as field seperator
@@ -30,8 +27,6 @@ EndLine = "\n"
 
 # #######################################################################################################
 
-
-#logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 def DisplayInstances(instances, compartmentName, instancetype, regionname):
   for instance in instances:
@@ -42,7 +37,7 @@ def DisplayInstances(instances, compartmentName, instancetype, regionname):
     OS = ""
     LicenseIncluded = ""
  
-    #print (instance)
+    
     # Handle details for Compute Instances
     if instancetype=="Compute":
       OCPU, MEM, SSD = shapes.ComputeShape(instance.shape)
@@ -78,7 +73,7 @@ def DisplayInstances(instances, compartmentName, instancetype, regionname):
     # Handle details for Database Instances
     if instancetype=="DB":
       OCPU, MEM, SSD = shapes.ComputeShape(instance.shape)
-      OCPU = instance.cpu_core_count # Overwrite Shape's CPU count, with DB enabled CPU count
+      OCPU = instance.cpu_core_count
       response = databaseClient.list_db_nodes(compartment_id = instance.compartment_id, db_system_id = instance.id)
       dbnodes = response.data
       try:
@@ -144,10 +139,10 @@ def DisplayInstances(instances, compartmentName, instancetype, regionname):
         except:
            tagtxt = tagtxt + FieldSeperator + NoValueString
     except:
-      tagtxt = ""  # No Tags
+      tagtxt = "" 
       
 
-    #line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{}{}".format(instance.display_name, instance.lifecycle_state, instancetypename, LicenseIncluded, version, OS, shape, OCPU, MEM, SSD, compartmentName, AD, privateips, publicips, tagtxt)
+    
     line =   "{}{}".format(      instance.display_name,    FieldSeperator)
     line = "{}{}{}".format(line, instance.lifecycle_state, FieldSeperator)
     line = "{}{}{}".format(line, instancetypename,         FieldSeperator)
@@ -171,16 +166,18 @@ report = open(ReportFile,'w')
 
 customertags = []
 header = "Name,State,Service,Licensed,Version,OS,Shape,OCPU,MEMORY,SSD TB,Compartment,AD,PrivateIP,PublicIP".replace(",", FieldSeperator)
-config = oci.config.from_file(configfile)
 
-identity = oci.identity.IdentityClient(config)
-user = identity.get_user(config["user"]).data
+
+delegation_token = open('/etc/oci/delegation_token', 'r').read()
+signer = oci.auth.signers.InstancePrincipalsDelegationTokenSigner(delegation_token=delegation_token)
+
+
+identity = oci.identity.IdentityClient({}, signer=signer)
+user = identity.get_user(User).data
 RootCompartmentID = user.compartment_id
-  
-print ("Logged in as: {} @ {}".format(user.description, config["region"]))
 print ("Querying Enabled Regions:")
 
-response = identity.list_region_subscriptions(config["tenancy"])
+response = identity.list_region_subscriptions(Tenancy)
 regions = response.data
 
 for region in regions:
@@ -218,18 +215,19 @@ print (header)
 report.write(header+EndLine)
 
 
-#Retrieve all instances for each config file (regions)
+#Retrieve all instances
 
 for region in regions:
-  config = oci.config.from_file(configfile)
-  config["region"] = region.region_name
-
-  identity = oci.identity.IdentityClient(config)
-  user = identity.get_user(config["user"]).data
+  
+  delegation_token = open('/etc/oci/delegation_token', 'r').read()
+  signer = oci.auth.signers.InstancePrincipalsDelegationTokenSigner(delegation_token=delegation_token)
+  
+  identity = oci.identity.IdentityClient({}, signer=signer)
+  user = identity.get_user(User).data
   RootCompartmentID = user.compartment_id
  
-  ComputeClient = oci.core.ComputeClient(config)
-  NetworkClient = oci.core.VirtualNetworkClient(config)
+  ComputeClient = oci.core.ComputeClient({}, signer=signer)
+  NetworkClient = oci.core.VirtualNetworkClient({}, signer=signer)
   
   
   # Check instances for all the underlaying Compartments   
@@ -245,7 +243,7 @@ for region in regions:
   
   for compartment in compartments:
     compartmentName = compartment.name
-    #print ("Checking : " + compartment.name)
+    
     if compartment.lifecycle_state == "ACTIVE":
       print ("process Compartment:" + compartmentName)
       
@@ -258,7 +256,7 @@ for region in regions:
       except:
         print ("Error?")
 
-      databaseClient = oci.database.DatabaseClient(config)
+      databaseClient = oci.database.DatabaseClient({}, signer=signer)
       try:
         response = oci.pagination.list_call_get_all_results(databaseClient.list_db_systems,compartment_id=compartmentID)
         if len(response.data) > 0:

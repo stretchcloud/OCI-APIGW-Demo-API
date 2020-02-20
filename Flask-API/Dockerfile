@@ -1,28 +1,18 @@
 FROM python:3.7-slim
 WORKDIR /home/app
 
-RUN mkdir /home/app/.oci
-COPY requirements.txt .
-COPY config /home/app/.oci/
-COPY oci_api_key.pem /home/app/.oci/
-COPY data-import.sh .
-COPY object-download.py .
-COPY FlaskApp.py .
+ADD * /home/app
 
-
-RUN apt-get update -y &&\
-apt-get install -y curl &&\
-pip install --upgrade pip &&\
-pip install -r requirements.txt &&\
-curl -L -O https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh &&\
-chmod 777 install.sh &&\
-./install.sh --accept-all-defaults &&\
+RUN apt-get update -y &&\ 
 addgroup --system app &&\
 adduser --system --ingroup app --no-create-home app &&\
+pip install --upgrade pip &&\
+pip install -r requirements.txt &&\
 apt-get install -y sqlite &&\
-python object-download.py &&\
-chmod 777 data-import.sh &&\
-./data-import.sh
+python list_instances.py &&\
+chmod +x data-import.sh &&\
+./data-import.sh &&\
+rm -rf Dockerfile
 
 
 EXPOSE 5000
